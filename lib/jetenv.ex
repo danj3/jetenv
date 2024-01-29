@@ -48,6 +48,11 @@ defmodule Jetenv do
   je__my_app__Elixir_MyApp_Repo__database__S=mydb
   ```
 
+  equivalent to:
+  ```
+  config :my_app, MyApp.Repo, database: "mydb"
+  ```
+
   """
 
   @typedoc """

@@ -1,10 +1,88 @@
 # Jetenv
 
-Full Application configuration from only the environment by using
-a predictable and direct name translation into config node plus
-type specification and bundled/armored encoding for complex types.
+Complete application configuration from the system environment with
+an intuitive schema that includes type casting while minimizing
+`runtime.exs` to only two lines.
 
-## Background
+## Comparison for Repo configuration
+
+A brief example, more details in below sections, to illustrate
+how Jetenv works by comparing it to the conventional runtime
+configuration method.
+
+### Conventional approach
+A representative [`runtime.exs`](`m:Mix#module-runtime-configuration`)
+fragment to configure a Repo from the environment:
+
+```
+config :example, Example.Repo, [
+  username: System.get_env("DB_USERNAME"),
+  password: System.get_env("DB_PASSWORD"),
+  hostname: System.get_env("DB_HOSTNAME"),
+  database: System.get_env("DB_DATABASE"),
+  port: System.get_env("DB_PORT", "5432") |> String.to_integer()
+]
+```
+
+An `env.sh` file that would supply these values:
+```
+set -a
+DB_USERNAME="postgres"
+DB_PASSWORD="postgres"
+DB_HOSTNAME="localhost"
+DB_DATABASE="example_dev"
+DB_PORT="5432"
+set +a
+```
+
+### Jetenv approach
+
+The Jetenv alternative skips the `runtime.exs` coding/mapping entirely and
+replaces it with a single line:
+```
+Jetenv.load_env()
+```
+
+Now the equivalent `env.sh`, looks like:
+```
+set -a
+je__example__Elixir_Example_Repo__database__S="example_dev"
+je__example__Elixir_Example_Repo__hostname__S="localhost"
+je__example__Elixir_Example_Repo__password__S="postgres"
+je__example__Elixir_Example_Repo__username__S="postgres"
+je__example__Elixir_Example_Repo__port__I="5432"
+set +a
+```
+
+### Key improvements
+
+Observe that:
+* The configuration is stated one less time
+* The Jetenv structured environment provides direct name translation, the name tells exactly what is being configured
+* No ad-hoc names have to be created and managed over time
+* The `runtime.exs` does not obscure the mapping of the external environment to the Application environment
+* Type conversion is driven by the input name
+* Any config node can be configured without code changes
+
+With ad-hoc names in the conventional approach, adding a second Repo 
+would involve having to invent another set of ad-hoc names that
+are different than the `DB_` names, leading to more knowledge embedded in `runtime.exs`, possibly
+having to rename things (breaking changes), and neither may be quite precise or fully descriptive.
+Avoiding this problem by using the real name being configured in the Jetenv approach
+removes the need to invent names, is forward compatible, and always descriptive.
+
+By not having to code translations in `runtime.exs` also means anything and everything
+can be configured via the environment. This can be crucial in production and debugging
+scenarios.
+
+### Validation illusion
+The conventional method might seem safer, providing an opportunity to check types, formats and
+inputs. However, the validation task is much more complex and best not left to ad-hoc code in
+`runtime.exs`. There are also other ways for config to be merged into the application controller.
+For true declarative validation, look at incorporating `m:NimbleOptions` into Application start up.
+
+
+# Design Background
 
 Given that Application configuration is a tree data structure comprised of 
 Keyword lists, addressing any point in the KW hierarchy can be expressed as
@@ -24,7 +102,7 @@ applications. The only special character is the underscore `_`.
 ## Variable name construction
 
 * Path segments are separated by a double underscore `__`
-* Variables use a common prefix (default is `je`), allows automatic configuration
+* Names use a common prefix (default is `je`), allows automatic discovery and configuration
 * A required type suffix allows automatic interpolation
 
 Example:
@@ -34,9 +112,14 @@ je__my_app__some_thing__S="A string value"
 
 ```
 
+This is equivalent to
+```
+config :my_app, :some_thing, "A string value"
+```
+
 ## Types supported
 
-See `Jetenv`
+See `m:Jetenv`
 
 ## Generator
 
@@ -98,18 +181,18 @@ This message is harmless.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
+Jetenv is [available in Hex](https://hex.pm/packages/jetenv).
+The package can be installed
 by adding `jetenv` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:jetenv, "~> 0.1.0"}
+    {:jetenv, "~> 0.1.1"}
   ]
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/jetenv>.
+
+Documentation can be found at <https://hexdocs.pm/jetenv>.
 

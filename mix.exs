@@ -4,15 +4,15 @@ defmodule Jetenv.MixProject do
   def project do
     [
       app: :jetenv,
-      version: "0.1.0",
-      elixir: "~> 1.15",
+      version: "0.1.1",
+      elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
 
       # Docs
       name: "Jetenv",
-      source_url: "https://github.com/danj3/jetenv/tree/v-0.1.0",
+      source_url: "https://github.com/danj3/jetenv/tree/v-0.1.1",
       docs: [
         main: "readme",
         extras: ["README.md"]
@@ -48,7 +48,8 @@ defmodule Jetenv.MixProject do
   defp deps do
     [
       {:jason, "~> 1.4"},
-      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:nimble_options, "~> 1.1"},
     ]
   end
 end
